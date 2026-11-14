@@ -10,13 +10,6 @@ networking:
 # Kubernetes version for control-plane and workers.
 kubernetesVersion: "1.34.0"
 
-containerdConfigPatches:
-  - |-
-    [plugins."io.containerd.grpc.v1.cni"]
-      root = "/home/kind/workload-dir"
-      bin-dir = "/usr/local/bin"
-      confPath = "/etc/containerd/cni/conf.d"
-
 nodes:
   - role: control-plane
   - role: worker
