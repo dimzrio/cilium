@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # create-cluster.sh — create a kind cluster: 1 control-plane + 2 workers,
 # disable default CNI, and install Cilium.
-# Usage: bash create.sh [cluster-name]
+# Usage: bash create.sh [cluster-name] [cilium-version]
 set -euo pipefail
 
 NAME="${1:-cilium-lab}"
+# Default Cilium version; override via second arg or $CILIUM_VERSION
+CILIUM_VERSION="${2:-${CILIUM_VERSION:-1.20.4}}"
 
 # Resolve to the script's directory so relative paths work from any CWD
 cd "$(dirname "$0")"
@@ -18,13 +20,13 @@ kind create cluster \
 echo "[2/4] Waiting for all nodes to be Ready..."
 kubectl wait --for=condition=Ready nodes --all --timeout=300s
 
-echo "[3/4] Installing Cilium (Helm)..."
+echo "[3/4] Installing Cilium (Helm) v${CILIUM_VERSION}..."
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 
 helm install cilium cilium/cilium \
   --namespace kube-system \
-  --version 0.16.0 \
+  --version "${CILIUM_VERSION}" \
   --values config/cilium-values.yaml
 
 echo "[4/4] Waiting for Cilium to be ready..."
