@@ -1,15 +1,12 @@
 # cilium helm values for labs
 # Install: helm install cilium cilium/cilium --namespace kube-system --version 0.16.0 --values config/helm-values.yaml
 
-# kube-proxy replacement: Cilium handles L4 LB via eBPF
+# Kube proxy replacement: Cilium handles L4 LB via eBPF
 kubeProxyReplacement: true
 
 # Cluster pool — sized for up to 3 clusters
 clusterPoolIPv4PodCIDR: "10.0.0.0/16"
 clusterPoolIPv4MaskSize: 24
-
-# Node CIDR
-nodeCIDR: "10.0.0.0/16"
 
 # Routing mode + tunnel protocol
 tunnel:
@@ -18,3 +15,11 @@ tunnel:
 # Operator replicas
 operator:
   replicas: 1
+
+# L2 announcements (gratuitous ARP/NDP for LB IPs)
+l2announcements:
+  enabled: true
+
+# Gateway API
+gatewayAPI:
+  enabled: true
