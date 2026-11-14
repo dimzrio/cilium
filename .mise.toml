@@ -1,0 +1,11 @@
+# .mise.toml — project-level tool pinning
+
+# Pins the toolchain for the cilium labs project. Read from the project root,
+# so mise resolves these versions per-project, not globally.
+
+[tools]
+kind       = "latest"
+kubectl    = "latest"
+cilium-cli = "latest"
+docker-cli = "latest"
+helm       = "latest"

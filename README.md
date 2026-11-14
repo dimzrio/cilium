@@ -7,6 +7,17 @@ and multi-cluster topologies on local and cloud Kubernetes clusters.
 The labs assume you already have a Kubernetes cluster (local or cloud) and a
 working `kubectl`. Each lab is self-contained so you can run them in any order.
 
+## Toolchain
+
+Tools are pinned at the **project level** via `.mise.toml` (not global):
+
+```bash
+eval "$(mise activate bash)"   # source once in a shell
+mise install                   # install pinned tools
+```
+
+See [.mise.toml](.mise.toml) for the pinned tool list.
+
 ---
 
 ## Quick start
