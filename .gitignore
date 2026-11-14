@@ -1,0 +1,58 @@
+# .gitignore
+
+```gitignore
+# clusters / runtimes
+*.kind
+kind-*.yaml
+
+# helm / manifests artifacts
+*.yaml.bak
+*.tpl
+
+# logs
+*.log
+
+# editors
+*.swp
+*~
+.idea/
+.vscode/
+
+# local state
+artifacts/
+tmp/
+
+# secrets (never commit these)
+*.secrets.yaml
+.env
+```
+
+---
+
+## env (global tooling pin)
+
+```toml
+# ~/.config/mise/config.toml
+[tools]
+cilium-cli = "latest"
+kind       = "latest"
+kubectl    = "latest"
+docker     = "latest"
+```
+
+---
+
+## Pre-commit
+
+If you use pre-commit (optional):
+
+```yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+```
