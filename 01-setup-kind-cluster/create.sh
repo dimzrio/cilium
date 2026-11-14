@@ -27,7 +27,7 @@ helm repo update
 helm install cilium cilium/cilium \
   --namespace kube-system \
   --version "${CILIUM_VERSION}" \
-  --values config/cilium-values.yaml
+  --values config/helm-values.yaml
 
 echo "[4/4] Waiting for Cilium to be ready..."
 kubectl -n kube-system rollout status ds/cilium --timeout=300s
