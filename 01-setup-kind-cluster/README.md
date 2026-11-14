@@ -7,8 +7,9 @@ workers, ready for the Cilium labs.
 
 | File | Purpose |
 |---|---|
-| `kind-cluster.yaml` | kind cluster manifest (1 control-plane + 2 workers) |
-| `create.sh` | One-command cluster bootstrap |
+| `config/kind-cluster.yaml` | kind cluster manifest (1 control-plane + 2 workers, disableDefaultCNI: true) |
+| `config/cilium-values.yaml` | Helm values for Cilium install |
+| `create.sh` | One-command cluster bootstrap + Cilium install |
 | `README.md` | This file |
 
 ## Prerequisites
