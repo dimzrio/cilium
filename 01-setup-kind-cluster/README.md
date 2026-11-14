@@ -45,6 +45,8 @@ kind delete cluster --name cilium-lab
 
 ## Notes
 
+- `networking.disableDefaultCNI: true` in `kind-cluster.yaml` removes flannel.
+  Cilium is installed as the CNI (see `create.sh` step 3/4).
 - `1.31.0` is the Kubernetes version pinned in `kind-cluster.yaml`.
   Bump at setup time if a lab requires a different version.
 - Cilium 0.16+ requires Kubernetes 1.27+; `1.31.0` is a safe choice.

@@ -1,10 +1,6 @@
 # .gitignore
 
 ```gitignore
-# kind clusters / kind configs
-*.kind
-kind-*.yaml
-
 # helm / manifests artifacts
 *.yaml.bak
 *.tpl
@@ -32,29 +28,3 @@ tmp/
 ```
 
 ---
-
-## env — global tooling pin
-
-```toml
-# ~/.config/mise/config.toml
-[tools]
-cilium-cli = "latest"
-kind       = "latest"
-kubectl    = "latest"
-docker     = "latest"
-```
-
----
-
-## Pre-commit (optional)
-
-```yaml
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-added-large-files
-```
