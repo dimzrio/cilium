@@ -2,10 +2,11 @@
 # Install: helm install cilium cilium/cilium --namespace kube-system --version 0.16.0 --values config/cilium-values.yaml
 
 # kube-proxy replacement: Cilium handles L4 LB via eBPF
-kubeProxyReplacement: strict
+kubeProxyReplacement: true
 
-# Cluster pool
-clusterPoolIPv4PodCIDR: "10.0.0.0/8"
+# Cluster pool — sized for up to 3 clusters
+# Pool: 10.0.0.0/16 (65,534 pod IPs), /24 per cluster -> 256 possible clusters
+clusterPoolIPv4PodCIDR: "10.0.0.0/16"
 clusterPoolIPv4MaskSize: 24
 
 # Node CIDR
