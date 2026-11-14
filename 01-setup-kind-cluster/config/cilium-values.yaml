@@ -9,6 +9,9 @@ kubeProxyReplacement: true
 clusterPoolIPv4PodCIDR: "10.0.0.0/16"
 clusterPoolIPv4MaskSize: 24
 
+# Node CIDR
+nodeCIDR: "10.0.0.0/16"
+
 # LB IP pool — supports up to 3 clusters
 # Separate range from pod pool (10.0.0.0/16) and node CIDR (10.0.0.0/16)
 # 10.0.100.0/22 = 4 /24 subnets -> covers 3 clusters + 1 spare
