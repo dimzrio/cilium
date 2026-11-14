@@ -1,0 +1,51 @@
+# 01 — Set up kind cluster (1 control-plane + 2 workers)
+
+Creates a local `kind` Kubernetes cluster with one control-plane and two
+workers, ready for the Cilium labs.
+
+## Files
+
+| File | Purpose |
+|---|---|
+| `kind-cluster.yaml` | kind cluster manifest (1 control-plane + 2 workers) |
+| `create.sh` | One-command cluster bootstrap |
+| `README.md` | This file |
+
+## Prerequisites
+
+- `mise` with `kind` + `kubectl` installed (see `.mise.toml`)
+- `docker` daemon running
+
+## Usage
+
+```bash
+# 1. Install tooling (project-level)
+eval "$(mise activate bash)"
+mise install        # kind, kubectl
+
+# 2. Create the cluster (1 control-plane + 2 workers)
+bash 01-setup-kind-cluster/create.sh cilium-lab
+```
+
+## Verify
+
+```bash
+kubectl get nodes -o wide
+# NAME           STATUS   ROLES           AGE   VERSION
+# cilium-lab     Ready    control-plane   10s   v1.31.0
+# cilium-lab-workers-1   Ready    <none>       10s   v1.31.0
+# cilium-lab-workers-2   Ready    <none>       10s   v1.31.0
+```
+
+## Tear down
+
+```bash
+kind delete cluster --name cilium-lab
+```
+
+## Notes
+
+- `1.31.0` is the Kubernetes version pinned in `kind-cluster.yaml`.
+  Bump at setup time if a lab requires a different version.
+- Cilium 0.16+ requires Kubernetes 1.27+; `1.31.0` is a safe choice.
+- Workers are bare nodes; Cilium will schedule onto them once installed.
