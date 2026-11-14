@@ -1,5 +1,5 @@
 # kind cluster manifest — 1 control-plane + 2 workers
-# Disable the default CNI (flannel). Cilium will be installed as the CNI.
+# disableDefaultCNI: true -> Cilium is the CNI (kind installs no flannel).
 
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
@@ -7,8 +7,8 @@ apiVersion: kind.x-k8s.io/v1alpha4
 networking:
   disableDefaultCNI: true
 
-# The Kubernetes version to use for the control-plane and workers.
-kubernetesVersion: "1.31.0"
+# Kubernetes version for control-plane and workers.
+kubernetesVersion: "1.34.0"
 
 containerdConfigPatches:
   - |-
@@ -19,11 +19,5 @@ containerdConfigPatches:
 
 nodes:
   - role: control-plane
-    kubeadmConfigPatches:
-      - |
-        apiVersion: kubeadm.k8s.io/v1beta3
-        nodeRegistration:
-          kubeletExtraArgs:
-            node-labels: "node.kubernetes.io/exclude-from-external-pods="
   - role: worker
   - role: worker

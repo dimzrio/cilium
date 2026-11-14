@@ -13,7 +13,7 @@ echo "[1/4] Creating kind cluster '${NAME}' (1 control-plane + 2 workers)..."
 kind create cluster \
   --name "${NAME}" \
   --config config/kind-cluster.yaml \
-  --image kindest/node:${K8S_VERSION:-"1.31.0"}
+  --image kindest/node:${K8S_VERSION:-"1.34.0"}
 
 echo "[2/4] Waiting for all nodes to be Ready..."
 kubectl wait --for=condition=Ready nodes --all --timeout=300s

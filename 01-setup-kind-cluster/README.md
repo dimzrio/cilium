@@ -7,7 +7,7 @@ workers, ready for the Cilium labs.
 
 | File | Purpose |
 |---|---|
-| `config/kind-cluster.yaml` | kind cluster manifest (1 control-plane + 2 workers, disableDefaultCNI: true) |
+| `config/kind-cluster.yaml` | kind manifest: 1 control-plane + 2 workers, disableDefaultCNI: true, K8s 1.34.0, no kubeadm patches |
 | `config/cilium-values.yaml` | Helm values for Cilium install |
 | `create.sh` | One-command cluster bootstrap + Cilium install |
 | `README.md` | This file |
