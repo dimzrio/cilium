@@ -1,13 +1,17 @@
 # .gitignore
 
 ```gitignore
-# clusters / runtimes
+# kind clusters / kind configs
 *.kind
 kind-*.yaml
 
 # helm / manifests artifacts
 *.yaml.bak
 *.tpl
+*.dump.yaml
+
+# Cilium dumps
+cilium-dump-*.tar.gz
 
 # logs
 *.log
@@ -18,18 +22,18 @@ kind-*.yaml
 .idea/
 .vscode/
 
-# local state
+# local tooling state
 artifacts/
 tmp/
 
-# secrets (never commit these)
+# secrets (never commit)
 *.secrets.yaml
 .env
 ```
 
 ---
 
-## env (global tooling pin)
+## env — global tooling pin
 
 ```toml
 # ~/.config/mise/config.toml
@@ -42,9 +46,7 @@ docker     = "latest"
 
 ---
 
-## Pre-commit
-
-If you use pre-commit (optional):
+## Pre-commit (optional)
 
 ```yaml
 repos:
