@@ -17,16 +17,16 @@ kind create cluster \
   --config config/kind-cluster.yaml \
   --image kindest/node:${K8S_VERSION}
 
-echo "[2/4] Installing Cilium (Helm) v${CILIUM_VERSION}..."
-helm repo add cilium https://helm.cilium.io/
-helm repo update
+#echo "[2/4] Installing Cilium (Helm) v${CILIUM_VERSION}..."
+#helm repo add cilium https://helm.cilium.io/
+#helm repo update
 
-helm install cilium cilium/cilium \
-  --namespace kube-system \
-  --version "${CILIUM_VERSION}" \
-  --values config/helm-values.yaml
+#helm install cilium cilium/cilium \
+#  --namespace kube-system \
+#  --version "${CILIUM_VERSION}" \
+#  --values config/helm-values.yaml
 
-echo "[3/4] Applying LB IP pools (CiliumLoadBalancerIPPool CRDs)..."
-kubectl apply -f config/cilium-lb-ip-pools.yaml
+#echo "[3/4] Applying LB IP pools (CiliumLoadBalancerIPPool CRDs)..."
+#kubectl apply -f config/cilium-lb-ip-pools.yaml
 
 echo "Done."
