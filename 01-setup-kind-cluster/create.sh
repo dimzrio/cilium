@@ -17,10 +17,7 @@ kind create cluster \
   --config config/kind-cluster.yaml \
   --image kindest/node:${K8S_VERSION}
 
-echo "[2/4] Waiting for all nodes to be Ready..."
-kubectl wait --for=condition=Ready nodes --all --timeout=300s
-
-echo "[3/4] Installing Cilium (Helm) v${CILIUM_VERSION}..."
+echo "[2/4] Installing Cilium (Helm) v${CILIUM_VERSION}..."
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 
@@ -29,11 +26,7 @@ helm install cilium cilium/cilium \
   --version "${CILIUM_VERSION}" \
   --values config/helm-values.yaml
 
-echo "[4/4] Applying LB IP pools (CiliumLoadBalancerIPPool CRDs)..."
+echo "[3/4] Applying LB IP pools (CiliumLoadBalancerIPPool CRDs)..."
 kubectl apply -f config/cilium-lb-ip-pools.yaml
-
-echo "[5/5] Waiting for Cilium to be ready..."
-kubectl -n kube-system rollout status ds/cilium --timeout=300s
-cilium status --namespace kube-system
 
 echo "Done."
