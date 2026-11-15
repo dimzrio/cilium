@@ -1,0 +1,41 @@
+# cideb-lb-ip-pools.yaml — LB IP pools for 3 clusters
+#
+# Cilium LB IPAM supports up to 255 clusters (clustermesh.maxConnectedClusters).
+# This file creates the LB IP pool resources used by 3 kind clusters.
+#
+# Install:
+#   kubectl apply -f 01-setup-kind-cluster/config/cilium-lb-ip-pools.yaml
+#
+# Then set in helm-values.yaml:
+#   enableLBIPAM: true
+#   defaultLBServiceIPAM: lbipam
+
+---
+# Cluster A — pods from 10.0.1.0/24 (reserved in cluster pool)
+apiVersion: "cilium.io/v2"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "cluster-a-lb-pool"
+spec:
+  blocks:
+    - cidr: "10.0.100.0/24"
+
+---
+# Cluster B — pods from 10.0.2.0/24 (reserved in cluster pool)
+apiVersion: "cilium.io/v2"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "cluster-b-lb-pool"
+spec:
+  blocks:
+    - cidr: "10.0.101.0/24"
+
+---
+# Cluster C — pods from 10.0.3.0/24 (reserved in cluster pool)
+apiVersion: "cilium.io/v2"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "cluster-c-lb-pool"
+spec:
+  blocks:
+    - cidr: "10.0.102.0/24"

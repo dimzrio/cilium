@@ -29,7 +29,10 @@ helm install cilium cilium/cilium \
   --version "${CILIUM_VERSION}" \
   --values config/helm-values.yaml
 
-echo "[4/4] Waiting for Cilium to be ready..."
+echo "[4/4] Applying LB IP pools (CiliumLoadBalancerIPPool CRDs)..."
+kubectl apply -f config/cilium-lb-ip-pools.yaml
+
+echo "[5/5] Waiting for Cilium to be ready..."
 kubectl -n kube-system rollout status ds/cilium --timeout=300s
 cilium status --namespace kube-system
 

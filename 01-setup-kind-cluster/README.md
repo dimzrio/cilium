@@ -7,9 +7,10 @@ workers, ready for the Cilium labs.
 
 | File | Purpose |
 |---|---|
-| `config/helm-values.yaml` | Cilium helm values (kubeProxyReplacement, cluster pool, routing, operator) |
+| `config/helm-values.yaml` | Cilium helm values (kubeProxyReplacement, cluster pool, routing, operator, LB IPAM, L2, Gateway API) |
 | `config/kind-cluster.yaml` | kind manifest: 1 control-plane + 2 workers, disableDefaultCNI, K8s 1.34.0 |
-| `create.sh` | One-command cluster bootstrap + Cilium install |
+| `config/cilium-lb-ip-pools.yaml` | CiliumLoadBalancerIPPool CRDs for 3 clusters |
+| `create.sh` | One-command cluster bootstrap + Cilium install + LB IP pools |
 | `README.md` | This file |
 
 ## Prerequisites
