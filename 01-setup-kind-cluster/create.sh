@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # create-cluster.sh — create a kind cluster: 1 control-plane + 2 workers,
 # disable default CNI, and install Cilium.
-# Usage: bash create.sh [cluster-name] [cilium-version]
+# Usage: bash create.sh [cluster-name] [cilium-version] [k8s-version]
 set -euo pipefail
 
 NAME="${1:-cilium-lab}"
-# Default Cilium version; override via second arg or $CILIUM_VERSION
 CILIUM_VERSION="${2:-${CILIUM_VERSION:-1.20.4}}"
+K8S_VERSION="${3:-v1.34.0}"
 
 # Resolve to the script's directory so relative paths work from any CWD
 cd "$(dirname "$0")"
@@ -15,7 +15,7 @@ echo "[1/4] Creating kind cluster '${NAME}' (1 control-plane + 2 workers)..."
 kind create cluster \
   --name "${NAME}" \
   --config config/kind-cluster.yaml \
-  --image kindest/node:v1.34.0
+  --image kindest/node:${K8S_VERSION}
 
 echo "[2/4] Waiting for all nodes to be Ready..."
 kubectl wait --for=condition=Ready nodes --all --timeout=300s
