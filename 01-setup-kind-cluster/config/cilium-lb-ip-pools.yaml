@@ -10,10 +10,11 @@
 
 ---
 # Cluster A — single LB IP pool (name: cluster-lb-pool)
+# Using 172.x.x.x (private RFC1918, class B)
 apiVersion: "cilium.io/v2"
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: "cluster-lb-pool"
 spec:
   blocks:
-    - cidr: "10.0.100.0/24"
+    - cidr: "172.17.0.0/24"
