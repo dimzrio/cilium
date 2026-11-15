@@ -8,9 +8,9 @@ kubeProxyReplacement: true
 clusterPoolIPv4PodCIDR: "10.0.0.0/16"
 clusterPoolIPv4MaskSize: 24
 
-# Routing mode + tunnel protocol (Cilium helm values)
-routingMode: "tunnel"
-tunnelProtocol: "vxlan"
+# IPAM configuration
+ipam:
+  mode: kubernetes
 
 # Operator replicas
 operator:
