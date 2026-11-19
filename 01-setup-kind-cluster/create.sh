@@ -3,15 +3,12 @@
 # default CNI disabled, then install Cilium as the CNI.
 # Usage: ./create.sh [cluster-name] [cilium-version] [k8s-version] [--keep]
 #
-# Requires ROOTFUL Docker. kind node containers need real privileges to mount
-# bpffs (/sys/fs/bpf). Under rootless Docker, Cilium's mount-bpf-fs init
-# container fails with "mount: /sys/fs/bpf: permission denied".
+# Requires ROOTFUL Docker: kind nodes must mount bpffs (/sys/fs/bpf), which
+# rootless Docker cannot do (this machine runs rootful only).
 #
 # A same-named cluster is deleted and recreated automatically, so a plain
-# `./create.sh` always yields a clean cluster. This is intentional: re-running
-# over an existing cluster leaves orphaned Cilium containers holding a shared
-# bpffs mount, which makes the new agent's mount-bpf-fs fail with EPERM.
-# Pass --keep to abort instead of deleting an existing cluster.
+# `./create.sh` always yields a clean cluster. Pass --keep to abort instead of
+# deleting an existing cluster.
 set -euo pipefail
 
 # --- Parse args (positional + optional flags) ---
@@ -30,20 +27,15 @@ K8S_VERSION="${ARGS[2]:-v1.37.0}"
 # Resolve to the script's directory so relative paths work from any CWD
 cd "$(dirname "$0")"
 
-# --- Cilium requires ROOTFUL Docker ---
-# A shell that sources ~/.bashrc may export DOCKER_HOST pointing at the rootless
-# socket ($XDG_RUNTIME_DIR/docker.sock), which cannot mount bpffs. DOCKER_HOST
-# overrides `docker context`, so we must unset it and force the default context.
-if [[ -n "${DOCKER_HOST:-}" ]]; then
-  echo "Ignoring DOCKER_HOST=${DOCKER_HOST} (forcing rootful 'default' context)."
-fi
+# --- Docker: Cilium needs the rootful daemon (real bpffs mounts) ---
+# Clear any stale DOCKER_HOST (e.g. an old shell still pointing at the removed
+# rootless socket) and force the rootful 'default' context.
 unset DOCKER_HOST
 export DOCKER_CONTEXT=default
 
 if docker info 2>/dev/null | grep -qi 'rootless'; then
-  echo "ERROR: the Docker daemon is rootless — Cilium cannot mount bpffs."
-  echo "Start/use the rootful daemon:"
-  echo "  sudo systemctl start docker && docker context use default"
+  echo "ERROR: active Docker daemon is rootless — Cilium cannot mount bpffs."
+  echo "Use rootful: sudo systemctl start docker && docker context use default"
   exit 1
 fi
 
