@@ -1,26 +1,63 @@
 #!/usr/bin/env bash
 # create-cluster.sh — create a kind cluster (1 control-plane + 2 workers) with the
 # default CNI disabled, then install Cilium as the CNI.
-# Usage: bash create.sh [cluster-name] [cilium-version] [k8s-version]
+# Usage: bash create.sh [cluster-name] [cilium-version] [k8s-version] [--recreate]
 #
 # Requires ROOTFUL Docker. kind node containers need real privileges to mount
 # bpffs (/sys/fs/bpf). Under rootless Docker, Cilium's mount-bpf-fs init
 # container fails with "mount: /sys/fs/bpf: permission denied".
+#
+# If a cluster with the same name already exists, the script aborts unless
+# --recreate is passed (which deletes it first). Re-running over an existing
+# cluster leaves orphaned Cilium containers holding a shared bpffs mount, which
+# makes the new agent's mount-bpf-fs fail with EPERM -> Init:CrashLoopBackOff.
 set -euo pipefail
 
-NAME="${1:-cilium-lab}"
-CILIUM_VERSION="${2:-${CILIUM_VERSION:-1.20.5}}"
-K8S_VERSION="${3:-v1.37.0}"
+# --- Parse args (positional + optional --recreate) ---
+ARGS=(); RECREATE=0
+for a in "$@"; do
+  case "$a" in
+    --recreate|-f) RECREATE=1 ;;
+    *) ARGS+=("$a") ;;
+  esac
+done
+NAME="${ARGS[0]:-cilium-lab}"
+CILIUM_VERSION="${ARGS[1]:-${CILIUM_VERSION:-1.20.5}}"
+K8S_VERSION="${ARGS[2]:-v1.37.0}"
 
 # Resolve to the script's directory so relative paths work from any CWD
 cd "$(dirname "$0")"
 
-# --- Guard: refuse to run on rootless Docker ---
+# --- Cilium requires ROOTFUL Docker ---
+# A shell that sources ~/.bashrc may export DOCKER_HOST pointing at the rootless
+# socket ($XDG_RUNTIME_DIR/docker.sock), which cannot mount bpffs. DOCKER_HOST
+# overrides `docker context`, so we must unset it and force the default context.
+if [[ -n "${DOCKER_HOST:-}" ]]; then
+  echo "Ignoring DOCKER_HOST=${DOCKER_HOST} (forcing rootful 'default' context)."
+fi
+unset DOCKER_HOST
+export DOCKER_CONTEXT=default
+
 if docker info 2>/dev/null | grep -qi 'rootless'; then
-  echo "ERROR: rootless Docker detected."
-  echo "kind + Cilium requires rootful Docker (rootless cannot mount bpffs)."
-  echo "Fix: docker context use default && sudo systemctl start docker"
+  echo "ERROR: the Docker daemon is rootless — Cilium cannot mount bpffs."
+  echo "Start/use the rootful daemon:"
+  echo "  sudo systemctl start docker && docker context use default"
   exit 1
+fi
+
+# --- Guard: never run 'kind create' over an existing cluster ---
+if kind get clusters 2>/dev/null | grep -qx "${NAME}"; then
+  if [[ "${RECREATE}" == "1" ]]; then
+    echo "Existing cluster '${NAME}' found — recreating (--recreate)..."
+    kind delete cluster --name "${NAME}"
+  else
+    echo "ERROR: kind cluster '${NAME}' already exists."
+    echo "Re-running over it leaves orphaned Cilium containers and a stale"
+    echo "shared bpffs mount, which breaks the new agent (mount-bpf-fs EPERM)."
+    echo "Recreate cleanly with:"
+    echo "  bash $0 ${NAME} ${CILIUM_VERSION} ${K8S_VERSION} --recreate"
+    exit 1
+  fi
 fi
 
 echo "[1/5] Creating kind cluster '${NAME}' (1 control-plane + 2 workers)..."
