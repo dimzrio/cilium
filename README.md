@@ -60,9 +60,8 @@ bash 01-setup-kind-cluster/create.sh
 ### Customizing
 
 ```bash
-# usage: create.sh [cluster-name] [cilium-version] [k8s-image-version] [--keep]
-# default: an existing same-named cluster is deleted and recreated;
-#          pass --keep to abort instead of deleting.
+# usage: create.sh [cluster-name] [cilium-version] [k8s-image-version]
+# an existing same-named cluster is deleted and recreated automatically
 bash 01-setup-kind-cluster/create.sh cilium-lab 1.20.5 v1.37.0
 ```
 

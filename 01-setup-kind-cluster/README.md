@@ -35,9 +35,9 @@ mise install
 ### Customizing
 
 ```bash
-# usage: ./create.sh [cluster-name] [cilium-version] [k8s-image-version] [--keep]
+# usage: ./create.sh [cluster-name] [cilium-version] [k8s-image-version]
+# an existing same-named cluster is deleted and recreated automatically
 ./create.sh cilium-lab 1.20.5 v1.37.0
-# --keep aborts if the cluster exists instead of deleting and recreating
 ```
 
 ## Verify

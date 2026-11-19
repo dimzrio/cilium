@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
-# usage: ./create.sh [name] [cilium-version] [k8s-version] [--keep]
+# usage: ./create.sh [name] [cilium-version] [k8s-version]
 # kind cluster (1 control-plane + 2 workers) with Cilium as the CNI.
-# Needs rootful Docker. An existing cluster of the same name is recreated
-# unless --keep is passed.
+# Needs rootful Docker. An existing cluster of the same name is recreated.
 set -euo pipefail
 
-ARGS=(); KEEP=0
-for a in "$@"; do
-  if   [[ "$a" == "--keep" ]]; then KEEP=1
-  elif [[ "$a" == -*    ]]; then :
-  else ARGS+=("$a"); fi
-done
-NAME="${ARGS[0]:-cilium-lab}"
-CILIUM_VERSION="${ARGS[1]:-1.20.5}"
-K8S_VERSION="${ARGS[2]:-v1.37.0}"
+NAME="${1:-cilium-lab}"
+CILIUM_VERSION="${2:-1.20.5}"
+K8S_VERSION="${3:-v1.37.0}"
 
 cd "$(dirname "$0")"
 
@@ -23,7 +16,6 @@ if docker info 2>/dev/null | grep -qi rootless; then
 fi
 
 if kind get clusters 2>/dev/null | grep -qx "$NAME"; then
-  if (( KEEP )); then echo "ERROR: cluster '$NAME' exists (--keep)."; exit 1; fi
   kind delete cluster --name "$NAME"
 fi
 
