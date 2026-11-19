@@ -1,42 +1,54 @@
 # 01 — Set up kind cluster (1 control-plane + 2 workers)
 
 Creates a local `kind` Kubernetes cluster with one control-plane and two
-workers, ready for the Cilium labs.
+workers, disables the default CNI, installs Cilium as the CNI, and applies an
+LB IP pool.
 
 ## Files
 
 | File | Purpose |
 |---|---|
-| `config/helm-values.yaml` | Cilium helm values (kubeProxyReplacement, cluster pool, routing, operator, LB IPAM, L2, Gateway API) |
-| `config/kind-cluster.yaml` | kind manifest: 1 control-plane + 2 workers, disableDefaultCNI, K8s 1.34.0 |
-| `config/cilium-lb-ip-pools.yaml` | CiliumLoadBalancerIPPool CRDs for 3 clusters |
-| `create.sh` | One-command cluster bootstrap + Cilium install + LB IP pools |
+| `config/kind-cluster.yaml` | kind manifest: 1 control-plane + 2 workers, `disableDefaultCNI: true`, `kubeProxyMode: none` |
+| `config/cilium-lb-ip-pools.yaml` | `CiliumLoadBalancerIPPool` CRD (`cluster-lb-pool`, `172.17.0.0/24`) |
+| `create.sh` | One-command bootstrap: create cluster → install Cilium → apply LB pools → verify |
 | `README.md` | This file |
 
 ## Prerequisites
 
-- `mise` with `kind` + `kubectl` installed (see `.mise.toml`)
-- `docker` daemon running
+- **Rootful Docker.** kind nodes must mount `bpffs` (`/sys/fs/bpf`). Rootless
+  Docker cannot, and Cilium's `mount-bpf-fs` init container fails with
+  `mount: /sys/fs/bpf: permission denied`. Confirm with `docker context show`.
+- `mise` with `kind`, `kubectl`, `helm`, `cilium-cli` installed (see repo `.mise.toml`).
 
 ## Usage
 
 ```bash
 # 1. Install tooling (project-level)
 eval "$(mise activate bash)"
-mise install        # kind, kubectl
+mise install
 
-# 2. Create the cluster (1 control-plane + 2 workers)
+# 2. Create the cluster + install Cilium + LB pool, then verify
 bash 01-setup-kind-cluster/create.sh cilium-lab
+```
+
+### Customizing
+
+```bash
+# usage: create.sh [cluster-name] [cilium-version] [k8s-image-version]
+bash 01-setup-kind-cluster/create.sh cilium-lab 1.20.5 v1.37.0
 ```
 
 ## Verify
 
 ```bash
-kubectl get nodes -o wide
-# NAME           STATUS   ROLES           AGE   VERSION
-# cilium-lab     Ready    control-plane   10s   v1.31.0
-# cilium-lab-workers-1   Ready    <none>       10s   v1.31.0
-# cilium-lab-workers-2   Ready    <none>       10s   v1.31.0
+kubectl get nodes
+# NAME                       STATUS   ROLES           VERSION
+# cilium-lab-control-plane   Ready    control-plane   v1.37.0
+# cilium-lab-worker          Ready    <none>          v1.37.0
+# cilium-lab-worker2         Ready    <none>          v1.37.0
+
+cilium status --namespace kube-system
+# Cilium: OK  Operator: OK  Envoy DaemonSet: OK
 ```
 
 ## Tear down
@@ -47,9 +59,8 @@ kind delete cluster --name cilium-lab
 
 ## Notes
 
-- `networking.disableDefaultCNI: true` in `kind-cluster.yaml` removes flannel.
-  Cilium is installed as the CNI (see `create.sh` step 3/4).
-- `1.31.0` is the Kubernetes version pinned in `kind-cluster.yaml`.
-  Bump at setup time if a lab requires a different version.
-- Cilium 0.16+ requires Kubernetes 1.27+; `1.31.0` is a safe choice.
-- Workers are bare nodes; Cilium will schedule onto them once installed.
+- Nodes stay `NotReady` until Cilium is installed — expected when the default
+  CNI is disabled. The script installs Cilium right after cluster creation.
+- The `cilium-envoy` startup probe may fail briefly while envoy initialises; it
+  turns ready once the agent pushes its config. This is transient.
+- `create.sh` default is Cilium `1.20.5` on Kubernetes `v1.37.0`.
