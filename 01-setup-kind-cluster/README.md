@@ -28,14 +28,16 @@ eval "$(mise activate bash)"
 mise install
 
 # 2. Create the cluster + install Cilium + LB pool, then verify
-bash 01-setup-kind-cluster/create.sh cilium-lab
+#    (run from this folder; re-running recreates 'cilium-lab' automatically)
+./create.sh cilium-lab
 ```
 
 ### Customizing
 
 ```bash
-# usage: create.sh [cluster-name] [cilium-version] [k8s-image-version]
-bash 01-setup-kind-cluster/create.sh cilium-lab 1.20.5 v1.37.0
+# usage: ./create.sh [cluster-name] [cilium-version] [k8s-image-version] [--keep]
+./create.sh cilium-lab 1.20.5 v1.37.0
+# --keep aborts if the cluster exists instead of deleting and recreating
 ```
 
 ## Verify

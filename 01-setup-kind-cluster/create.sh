@@ -1,23 +1,25 @@
 #!/usr/bin/env bash
 # create-cluster.sh — create a kind cluster (1 control-plane + 2 workers) with the
 # default CNI disabled, then install Cilium as the CNI.
-# Usage: bash create.sh [cluster-name] [cilium-version] [k8s-version] [--recreate]
+# Usage: ./create.sh [cluster-name] [cilium-version] [k8s-version] [--keep]
 #
 # Requires ROOTFUL Docker. kind node containers need real privileges to mount
 # bpffs (/sys/fs/bpf). Under rootless Docker, Cilium's mount-bpf-fs init
 # container fails with "mount: /sys/fs/bpf: permission denied".
 #
-# If a cluster with the same name already exists, the script aborts unless
-# --recreate is passed (which deletes it first). Re-running over an existing
-# cluster leaves orphaned Cilium containers holding a shared bpffs mount, which
-# makes the new agent's mount-bpf-fs fail with EPERM -> Init:CrashLoopBackOff.
+# A same-named cluster is deleted and recreated automatically, so a plain
+# `./create.sh` always yields a clean cluster. This is intentional: re-running
+# over an existing cluster leaves orphaned Cilium containers holding a shared
+# bpffs mount, which makes the new agent's mount-bpf-fs fail with EPERM.
+# Pass --keep to abort instead of deleting an existing cluster.
 set -euo pipefail
 
-# --- Parse args (positional + optional --recreate) ---
-ARGS=(); RECREATE=0
+# --- Parse args (positional + optional flags) ---
+ARGS=(); KEEP=0
 for a in "$@"; do
   case "$a" in
-    --recreate|-f) RECREATE=1 ;;
+    --keep) KEEP=1 ;;          # abort if a same-named cluster already exists
+    --recreate|-f) ;;          # accepted for backward compat; recreate is default
     *) ARGS+=("$a") ;;
   esac
 done
@@ -45,19 +47,15 @@ if docker info 2>/dev/null | grep -qi 'rootless'; then
   exit 1
 fi
 
-# --- Guard: never run 'kind create' over an existing cluster ---
+# --- Recreate by default: delete any existing same-named cluster ---
 if kind get clusters 2>/dev/null | grep -qx "${NAME}"; then
-  if [[ "${RECREATE}" == "1" ]]; then
-    echo "Existing cluster '${NAME}' found — recreating (--recreate)..."
-    kind delete cluster --name "${NAME}"
-  else
-    echo "ERROR: kind cluster '${NAME}' already exists."
-    echo "Re-running over it leaves orphaned Cilium containers and a stale"
-    echo "shared bpffs mount, which breaks the new agent (mount-bpf-fs EPERM)."
-    echo "Recreate cleanly with:"
-    echo "  bash $0 ${NAME} ${CILIUM_VERSION} ${K8S_VERSION} --recreate"
+  if [[ "${KEEP}" == "1" ]]; then
+    echo "ERROR: cluster '${NAME}' already exists (--keep)."
+    echo "Delete it first, or drop --keep to recreate automatically."
     exit 1
   fi
+  echo "Cluster '${NAME}' already exists — deleting to recreate cleanly..."
+  kind delete cluster --name "${NAME}"
 fi
 
 echo "[1/5] Creating kind cluster '${NAME}' (1 control-plane + 2 workers)..."
