@@ -5,7 +5,8 @@ metadata:
   name: ip-pool-balancer
 spec:
   blocks:
-    - cidr: 172.17.0.0/24
+    # 172.17.0.0/16 is Docker's default bridge (docker0) — use a free /24
+    - cidr: 172.20.0.0/24
 ---
 apiVersion: "cilium.io/v2alpha1"
 kind: CiliumL2AnnouncementPolicy
