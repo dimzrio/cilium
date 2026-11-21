@@ -19,14 +19,18 @@ if kind get clusters 2>/dev/null | grep -qx "$NAME"; then
   kind delete cluster --name "$NAME"
 fi
 
+echo "[1/3] Creating kind cluster '${NAME}'..."
 kind create cluster --name "$NAME" --config config/kind-cluster.yaml --image "kindest/node:$K8S_VERSION"
 
+echo "[2/3] Installing cilium..."
 IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$NAME-control-plane")
 helm repo add cilium https://helm.cilium.io/ >/dev/null
 helm repo update >/dev/null
 helm install cilium cilium/cilium -n kube-system --version "$CILIUM_VERSION" \
   -f config/helm-values.yaml --set k8sServiceHost="$IP"
 
-kubectl -n kube-system rollout status ds/cilium --timeout=600s
-kubectl apply -f config/cilium-lb-ip-pools.yaml
+echo "[3/3 Waiting for all nodes to be Ready..."
+kubectl wait --for=condition=Ready nodes --all --timeout=300s
+
+kubectl apply -f config/cilium-manifest.yaml
 cilium status -n kube-system

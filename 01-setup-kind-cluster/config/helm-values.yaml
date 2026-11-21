@@ -10,3 +10,11 @@ ipam:
 kubeProxyReplacement: true
 
 k8sServicePort: 6443
+
+networking:
+  disableDefaultCNI: true
+  podSubnet: "10.101.0.0/16"
+  serviceSubnet: "10.11.0.0/23"
+
+l2announcements:
+  enabled: true
