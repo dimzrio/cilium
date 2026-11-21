@@ -1,0 +1,12 @@
+# Cilium Helm values for the kind lab cluster.
+# Note: k8sServiceHost is injected by create.sh at install time (the
+# control-plane container IP is discovered at runtime), so it is not set here.
+image:
+  pullPolicy: IfNotPresent
+
+ipam:
+  mode: kubernetes
+
+kubeProxyReplacement: true
+
+k8sServicePort: 6443

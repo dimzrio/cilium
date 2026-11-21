@@ -51,8 +51,9 @@ bash 01-setup-kind-cluster/create.sh
 
 1. Create a kind cluster (1 control-plane + 2 workers, `disableDefaultCNI: true`,
    `kubeProxyMode: none`).
-2. Install Cilium via Helm (`ipam.mode=kubernetes`, `kubeProxyReplacement=true`,
-   `k8sServiceHost`/`k8sServicePort` set to the control-plane IP).
+2. Install Cilium via Helm using `config/helm-values.yaml` (`ipam.mode=kubernetes`,
+   `kubeProxyReplacement=true`, `image.pullPolicy`, `k8sServicePort`); the
+   `k8sServiceHost` is set at runtime to the control-plane container IP.
 3. Wait for the Cilium DaemonSet to roll out.
 4. Apply the `CiliumLoadBalancerIPPool` CRD (`172.17.0.0/24`).
 5. Print `cilium status`.

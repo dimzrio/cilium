@@ -25,10 +25,7 @@ IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}
 helm repo add cilium https://helm.cilium.io/ >/dev/null
 helm repo update >/dev/null
 helm install cilium cilium/cilium -n kube-system --version "$CILIUM_VERSION" \
-  --set image.pullPolicy=IfNotPresent \
-  --set ipam.mode=kubernetes \
-  --set kubeProxyReplacement=true \
-  --set k8sServiceHost="$IP" --set k8sServicePort=6443
+  -f config/helm-values.yaml --set k8sServiceHost="$IP"
 
 kubectl -n kube-system rollout status ds/cilium --timeout=600s
 kubectl apply -f config/cilium-lb-ip-pools.yaml
